@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ======================================================
+         PAGE METADATA
+    ======================================================= -->
+    <meta charset="UTF-8" />
+    <title>KittyLit – Personalized Book Picks for Kids</title>
+
+    <!-- ======================================================
+         MAIN THEME CSS
+    ======================================================= -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/warmstyle.css') }}" />
+</head>
+
+<body>
+
+    <!-- ======================================================
+         MAIN FORM CONTAINER
+    ======================================================= -->
+    <div class="container">
+        <h1>KittyLit – Personalized Book Picks for Kids</h1>
+
+        <!-- FILTER FORM -->
+        <form id="filter-form" onsubmit="return false;">
+
+            <!-- AGE -->
+            <div class="form-group">
+                <label>Select Age Group:</label>
+                <select id="age_group" name="age">
+                    <option value="">--Select Age--</option>
+                    {% for x in range(2, 15) %}
+                    <option value="{{ x }}">{{ x }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- GENRE -->
+            <div class="form-group">
+                <label>Select Genre:</label>
+                <select id="genre" name="genre">
+                    <option value="">--Select Genre--</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Educational">Educational</option>
+                    <option value="Animals">Animals</option>
+                    <option value="Mystery">Mystery</option>
+                    <option value="Fairy Tales">Fairy Tales</option>
+                </select>
+            </div>
+
+            <!-- LANGUAGE -->
+            <div class="form-group">
+                <label>Select Language:</label>
+                <select id="language" name="language">
+                    <option value="">--Select Language--</option>
+                    <option value="English">English</option>
+                    <option value="Tamil">Tamil</option>
+                    
+                </select>
+            </div>
+
+            <!-- ==========================================================
+                 YEAR CATEGORY (UPDATED 2025-12-09)
+                 - Replaces exact publication year
+                 - 4 clear parent-friendly buckets
+            =========================================================== -->
+            <div class="form-group">
+                <label>Select Year Category:</label>
+                <select id="year_category" name="year_category">
+                    <option value="">--Select Year Category--</option>
+                    <option value="before_2000">Before 2000 (Classics)</option>
+                    <option value="2000_2010">2000–2010</option>
+                    <option value="2010_2020">2010–2020</option>
+                    <option value="2020_present">2020–Present</option>
+                </select>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="button" id="recommend-btn" class="recommend-btn">
+                Recommend Books
+            </button>
+
+        </form>
+
+        <!-- ======================================================
+             RESULTS SECTION (QUERY SUMMARY + TABLE)
+        ======================================================= -->
+        <div id="results" class="results-box" style="display:none;">
+            
+            <!-- USER QUERY SUMMARY -->
+            <div id="query-summary" class="query-summary" style="display:none;">
+                <h3>Your Search</h3>
+                <p id="query-details"></p>
+            </div>
+
+            <!-- BOOK RESULTS TABLE -->
+            <table id="results-table" class="results-table" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Year Category</th>
+                        <th>Genre</th>
+                        <th>Language</th>
+                        <!-- ISBN column removed (2025-12-09)
+                             Reason:
+                             - Parents do not use ISBN
+                             - Reduces UI clutter
+                             - ISBN kept internally for DB/API matching -->
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+
+        </div>
+
+        <!-- FOOTER TEXT -->
+        <div class="footer-text">
+            KittyLit – A Kutty Library for Kids | Made with 💛 for parents & children
+        </div>
+    </div>
+
+    <!-- ======================================================
+         CHATBOT BUTTON
+    ======================================================= -->
+    <div id="kittylit-assistant">🐱 Ask me anything, anytime!</div>
+
+    <div id="chatbox-panel">
+        <button id="chatbox-close">&times;</button>
+        <h4>KittyLit Chatbox</h4>
+        <p>Chatbot coming soon.</p>
+    </div>
+
+    <!-- DEV LOGS LINK -->
+    <div style="text-align:right; padding:20px; margin-right:40px;">
+        <a href="/developer" target="_blank"
+           style="background:#ffb347; padding:10px 18px; border-radius:8px; color:#333; font-weight:600;">
+            🛠 Developer Logs
+        </a>
+    </div>
+
+    <!-- ======================================================
+         JAVASCRIPT SECTION
+    ======================================================= -->
+    <script>
+        const recommendBtn = document.getElementById("recommend-btn");
+
+        recommendBtn.addEventListener("click", () => {
+
+            const filters = {
+                age: document.getElementById("age_group").value,
+                genre: document.getElementById("genre").value,
+                language: document.getElementById("language").value,
+
+                /* ==========================================================
+                   YEAR CATEGORY (UPDATED 2025-12-09)
+                =========================================================== */
+                year_category: document.getElementById("year_category").value
+            };
+
+            console.log("[UI] Sending filters:", filters);
+
+            fetch("/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(filters)
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                const resultsDiv = document.getElementById("results");
+                const querySummary = document.getElementById("query-summary");
+                const queryDetails = document.getElementById("query-details");
+                const table = document.getElementById("results-table");
+                const tbody = document.getElementById("results-body");
+
+                resultsDiv.style.display = "block";
+                tbody.innerHTML = "";
+                querySummary.style.display = "block";
+
+                /* ==========================================================
+                   UPDATED SUMMARY (ISBN removed)
+                =========================================================== */
+                queryDetails.innerHTML = `
+                    <strong>Age:</strong> ${filters.age} &nbsp;&nbsp;
+                    <strong>Genre:</strong> ${filters.genre} &nbsp;&nbsp;
+                    <strong>Language:</strong> ${filters.language} &nbsp;&nbsp;
+                    <strong>Year Category:</strong> ${filters.year_category || "N/A"}
+                `;
+
+                if (data.items && data.items.length > 0) {
+
+                    table.style.display = "table";
+
+                    data.items.forEach(book => {
+                        const row = `
+                            <tr>
+                                <td>${book.title || "N/A"}</td>
+                                <td>${book.author || "N/A"}</td>
+                                <td>${book.year_category || "N/A"}</td>
+                                <td>${book.genre || "N/A"}</td>
+                                <td>${book.language || "N/A"}</td>
+                                <!-- ISBN intentionally removed from display -->
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+
+                } else {
+                    table.style.display = "none";
+                    tbody.innerHTML = "";
+
+                    queryDetails.innerHTML +=
+                        "<br><br><span style='color:#5e3b76;'>No recommendations found based on selected filters.</span>";
+                }
+
+            })
+            .catch(err => {
+                console.error("[UI] Error:", err);
+                document.getElementById("results").innerHTML =
+                    "<p style='color:red;'>Error fetching recommendations.</p>";
+            });
+        });
+    </script>
+
+</body>
+</html>
