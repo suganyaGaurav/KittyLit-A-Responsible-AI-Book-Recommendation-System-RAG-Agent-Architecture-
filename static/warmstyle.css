@@ -1,0 +1,307 @@
+/* ============================================================
+   Fonts
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Thambi+2&display=swap');
+
+/* ============================================================
+   Global Layout & Background
+   ============================================================ */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Merriweather', 'Georgia', serif;
+
+  background-image: url('../images/back_imag.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  color: black;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Main Container
+   ============================================================ */
+.container {
+  margin: 40px auto;
+  padding: 30px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 90%;
+  max-width: 700px;
+
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.container h1 {
+  font-size: 1.6rem;
+  margin: 0;
+  white-space: nowrap;
+  color: #5c4c86;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Form Styling
+   ============================================================ */
+form {
+  width: 100%;
+  margin-bottom: 30px;
+  background: transparent;
+}
+
+.form-group {
+  margin-top: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #5c4c86;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px 15px;
+
+  border: 1px solid #ccc;
+  border-radius: 12px;
+
+  font-size: 15px;
+  background-color: #fff;
+
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+input[type="text"]:focus,
+select:focus {
+  border-color: #9a6aff;
+  outline: none;
+  box-shadow: 0 0 8px #d1b3ff;
+}
+
+/* ============================================================
+   Submit Button
+   ============================================================ */
+.recommend-btn {
+  width: 100%;
+  margin-top: 25px;
+
+  padding: 14px;
+
+  background-color: #ffb347;
+  color: #333;
+
+  font-size: 17px;
+  font-weight: bold;
+
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+
+  box-shadow: 0 5px 15px rgba(255, 179, 71, 0.3);
+  transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.recommend-btn:hover {
+  background-color: #ff9900;
+  transform: scale(1.02);
+}
+
+/* ============================================================
+   Results Container
+   ============================================================ */
+.results-box {
+  width: 100%;
+  max-width: 900px;
+
+  background-color: rgba(255, 255, 255, 0.8);
+
+  padding: 20px;
+  margin: 20px auto;
+
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================
+   Query Summary Box (NEW)
+   ============================================================ */
+.query-summary {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 18px 20px;
+
+  border-left: 5px solid #ffb347;
+  border-radius: 14px;
+
+  margin-bottom: 25px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.query-summary h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+  color: #5c4c86;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Results Table
+   ============================================================ */
+.results-table {
+  width: 95% !important;          /* wider table */
+  margin-left: auto;              
+  margin-right: auto;             /* center table */
+  margin-top: 20px !important;    /* space under query summary */
+
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.9);
+
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.results-table th {
+  background-color: #ffb347;
+  color: #333;
+
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.results-table td {
+  padding: 12px 10px;
+  font-size: 14px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+/* Hover effect */
+.results-table tr:hover {
+  background-color: rgba(255, 179, 71, 0.15);
+  cursor: pointer;
+}
+
+/* Make Title column wider for readability */
+.results-table th:first-child,
+.results-table td:first-child {
+  width: 35% !important;
+}
+
+
+/* ============================================================
+   Chatbot Button & Panel
+   ============================================================ */
+#kittylit-assistant {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+
+  padding: 14px 20px;
+
+  background: #ffb347;
+  color: #333;
+
+  border-radius: 50px;
+
+  font-family: 'Baloo Thambi 2', cursive;
+  font-weight: 700;
+  font-size: 1.1rem;
+
+  box-shadow: 0 5px 15px rgba(255, 179, 71, 0.4);
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  z-index: 9999;
+  white-space: nowrap;
+}
+
+#kittylit-assistant:hover {
+  background-color: #ff9900;
+  transform: scale(1.05);
+}
+
+#chatbox-panel {
+  position: fixed;
+  bottom: 90px;
+  right: 30px;
+
+  width: 350px;
+  max-height: 400px;
+
+  background: rgba(255, 255, 255, 0.95);
+  color: #5c4c86;
+
+  border-radius: 20px;
+  padding: 15px;
+
+  display: none;
+  flex-direction: column;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 10000;
+}
+
+#chatbox-panel h4 {
+  margin: 0;
+  font-weight: 700;
+}
+
+#chatbox-close {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #7a5595;
+  margin-bottom: 10px;
+}
+
+/* ============================================================
+   Footer Text
+   ============================================================ */
+.footer-text {
+  font-size: 14px;
+  margin-top: 20px;
+
+  text-align: center;
+  font-style: italic;
+
+  color: #8e44ad;
+  text-shadow: 1px 1px 2px #fff;
+}
+
+/* ============================================================
+   Safety Override (consistent text color)
+   ============================================================ */
+body, body * {
+  color: black !important;
+}
