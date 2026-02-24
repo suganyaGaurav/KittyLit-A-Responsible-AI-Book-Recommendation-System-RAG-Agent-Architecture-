@@ -1,181 +1,247 @@
-# KittyLit – A Responsible AI Book Recommendation System  
-(RAG + Agent-Oriented Architecture)
+# KittyLit – A Responsible AI Book Recommendation System
 
-KittyLit is a production-minded MVP designed with reliability, governance, and evaluation embedded from the beginning. This project demonstrates how a real-world Generative AI system should be engineered —
-prioritizing correctness, safety, explainability, fallback logic, and observability over unchecked model creativity.
+Deterministic Recommendation Pipeline + RAG-Based Chatbot
+
+KittyLit is a production-oriented AI system for children’s book recommendations and guided reading assistance. It is engineered with governance, observability, fallback control, and evaluation embedded from the start.
+
+This project demonstrates how a real-world Generative AI system should be built — prioritizing correctness, traceability, safety, and reliability over unchecked model creativity.
 
 ---
 
 ## Project Overview
 
-KittyLit is an AI-driven children’s book recommendation system built using a custom Retrieval-Augmented Generation (RAG) pipeline combined with a deterministic agent-based orchestrator. The objective was not to build a large or feature-heavy application,
-but to demonstrate how a real-world GenAI system should be designed and operated in a responsible, controlled, and auditable manner. This repository reflects a practical, systems-level understanding of how trustworthy and scalable AI systems are built.
+KittyLit consists of two clearly separated subsystems:
+
+1. Deterministic Recommendation Pipeline (Primary search experience)  
+2. RAG-Based Chatbot System (Knowledge and guided interaction)
+
+Both subsystems share governance rules and structured logging, but they operate independently by design.
+
+This separation ensures:
+
+- Predictable recommendation behavior  
+- Controlled LLM usage  
+- Cost awareness  
+- Auditability  
+- Clear evaluation boundaries  
 
 ---
 
 ## Problem Statement
 
-Most AI-based recommendation or chatbot systems suffer from the following issues:
+Many AI-based recommendation or chatbot systems suffer from:
 
-- Hallucinated or fabricated recommendations  
-- Lack of grounding in verified data sources  
-- No clear fallback behavior when confidence is low  
-- Poor observability and debugging capability  
-- Governance and safety added as an afterthought  
-- No clear evaluation of retrieval or generation quality  
+- Hallucinated or fabricated results  
+- LLM treated as a source of truth  
+- No fallback or abstention behavior  
+- Poor observability  
+- Governance added after deployment  
+- No measurable evaluation framework  
 
-In the context of children’s content, these issues become even more critical due to safety, trust, and appropriateness requirements.
+In the context of children’s content, these risks are amplified due to safety, appropriateness, and trust requirements.
 
----
-
-## How the Problem Was Solved
-
-KittyLit addresses these challenges through explicit system design choices:
-
-- Retrieval is treated as the source of truth, not the LLM  
-- Similarity thresholds and context sufficiency checks are enforced  
-- The system explicitly abstains when confidence is low  
-- Governance checks are applied before generation  
-- Every decision path is logged and traceable  
-- Evaluation metrics are designed into the system from day one  
-
-The result is a system that prefers safe, correct behavior over fluent but unreliable output.
+KittyLit addresses these challenges through explicit system design decisions.
 
 ---
 
-## What Makes This Project Unique
+# System Architecture
 
-- Governance-first design rather than prompt-only safety  
-- Deterministic agent orchestration instead of implicit LLM reasoning  
-- Explicit fallback-first architecture to reduce hallucinations and cost  
-- Evaluation and observability treated as core features, not add-ons  
-- Clear separation of responsibilities across retrieval, routing, and generation  
-- Designed to be auditable, explainable, and reproducible  
+## Recommendation System (Deterministic Orchestrator)
 
-This project emphasizes engineering discipline over demo-driven design.
+This is the primary book search experience.
+
+Pipeline:
+
+User Query  
+-> Governance Checks  
+-> Cache Lookup  
+-> Database Query  
+-> Live External API (only if needed)  
+-> Structured Logging  
+-> Response  
+
+Characteristics:
+
+- No LLM usage  
+- No RAG involvement  
+- Fully deterministic routing  
+- Cost-controlled  
+- Predictable latency  
+- Explicit failure handling  
 
 ---
 
-## Key System Features
+### Data Lifecycle and Caching Strategy
 
-### Responsible AI Principles Built Into the Design
+The recommendation pipeline improves efficiency over time.
+
+- If a book is fetched from the Live API, it is persisted into the local database.  
+- Frequently accessed books are promoted into the cache layer.  
+- Subsequent queries prioritize Cache -> Database before calling the external API.  
+
+This ensures:
+
+- Reduced external API calls  
+- Lower operational cost  
+- Faster response times on repeated queries  
+- Progressive strengthening of the local knowledge base  
+
+The system becomes more efficient as it is used.
+
+---
+
+### Failure Handling (Recommendation Pipeline)
+
+- Cache miss -> Check database  
+- Database miss -> Call Live API  
+- Live API failure -> Return safe error response  
+- All decisions are logged with latency and reason codes  
+
+The system does not crash due to external API failure.
+
+---
+
+## Chatbot System (RAG + Controlled LLM)
+
+The chatbot is designed for:
+
+- Reading guidance  
+- Book-related knowledge questions  
+- Safe conversational interaction  
+
+Pipeline:
+
+User Query  
+-> Intent Detection (greeting / redirect / knowledge / general)  
+-> Governance Layer (PII checks and safety rules)  
+-> RAG Retrieval (FAISS with metadata filters)  
+-> Context Sufficiency Check  
+-> LLM Generation (if allowed)  
+-> Structured Logging  
+-> Response  
+
+Key Design Principles:
+
+- Retrieval is treated as the grounding source  
+- Similarity thresholds are enforced  
+- System abstains if retrieval confidence is low  
+- LLM output is constrained by retrieved context  
+- API failures trigger graceful fallback  
+- All decisions are logged and traceable  
+
+The LLM is not treated as a source of truth. It generates responses only when retrieval and governance checks pass.
+
+---
+
+# Governance-First Design
+
+Safety is enforced before generation.
+
+Implemented safeguards include:
 
 - PII detection and redaction  
-- Child-safe and age-appropriate content rules  
-- Transparent outputs with citations  
-- Confidence scoring and fallback reasoning  
-- Intent classification to prevent unsafe actions  
+- Child-safe and age-appropriate filtering  
+- Intent classification  
+- Confidence thresholds  
+- Explicit fallback responses  
+- Structured error handling  
 
-Safety checks are enforced before generation, not patched afterward.
-
----
-
-### Custom RAG Pipeline
-
-- Cleaned and validated book dataset  
-- MiniLM sentence embedding model  
-- FAISS vector index using exact search  
-- Hybrid retrieval using semantic similarity and metadata filters  
-- Reranking for improved relevance  
-- Context sufficiency checks before allowing generation  
-
-The LLM is never treated as a source of truth.
+The system prefers safe abstention over speculative output.
 
 ---
 
-### Agent Orchestrator With Deterministic Control
+# Observability and Structured Logging
 
-- Rule-based routing across system components:
-  - Cache
-  - Database
-  - RAG pipeline
-  - LLM (used only as a fallback)
-- Custom fallback logic
-- Short-term conversational memory
-- Summary-based long-term memory
-- Complete traceability through structured logs  
+Both subsystems provide structured logs including:
 
-This ensures predictable, debuggable system behavior.
+- User query  
+- Intent classification  
+- Retrieval similarity scores  
+- Retrieved chunks  
+- Model name and parameters (chatbot only)  
+- Governance decisions  
+- Fallback activation  
+- Error type (if any)  
+- Latency breakdown per component  
 
----
+A developer logs endpoint enables inspection of:
 
-### Fallback-First Architecture
+- Recommendation pipeline traces  
+- Chatbot RAG traces  
 
-To minimize hallucinations and control cost, the system follows a strict priority order:
-
-Cache → Database → RAG → External API → LLM
-
-Each step includes:
-
-- Explicit decision criteria  
-- Clear failure handling  
-- Logged reasoning paths  
+This enables reproducibility, debugging, and audit readiness.
 
 ---
 
-## Evaluation Framework
+# Evaluation Framework
 
-Evaluation is integrated into the system design, not added later.
+Evaluation is integrated into the design.
 
-Metrics tracked include:
+Retrieval Metrics (Chatbot):
 
 - Recall@K  
 - Mean Reciprocal Rank (MRR)  
 - nDCG  
+- Similarity distribution analysis  
+
+Generation Evaluation:
+
 - Groundedness checks  
-- Hallucination detection  
 - Citation precision  
-- Latency distribution (p50, p95)  
+- Hallucination detection  
+- Abstention rate  
+
+System Metrics:
+
+- Latency (p50, p95)  
 - Cost per query  
 - Fallback activation rate  
+- Error rate  
 
-These metrics support offline analysis, debugging, and continuous improvement.
-
----
-
-## Monitoring and Observability
-
-KittyLit provides full system observability through:
-
-- Structured logs at every pipeline stage  
-- Retrieval similarity and ranking logs  
-- Error and fallback tracing  
-- Latency breakdown per component  
-- Confidence and risk indicators  
-
-Every response is traceable and reproducible.
+Metrics support continuous improvement and governance review.
 
 ---
 
-## Tech Stack
+# Technology Stack
 
-- Backend: Python, Flask or FastAPI  
+- Backend: Python (Flask or FastAPI)  
 - Embeddings: MiniLM Sentence Transformer  
 - Vector Store: FAISS  
 - LLM: OpenAI or AWS Bedrock (configurable)  
 - Database: SQLite or JSON  
-- Memory: Buffer memory and summary memory  
-- Monitoring: Custom structured logging  
+- Cache: In-memory caching layer  
+- Memory: Short-term buffer and summary memory  
+- Logging: Structured JSON logs  
 
 ---
 
-## Architecture Summary
+# Repository Structure
 
-User Query  
-↓  
-Governance Layer (PII checks, safety rules, intent detection)  
-↓  
-Routing Logic  
-- Cache Lookup  
-- Database Query  
-- RAG Retrieval (FAISS)  
-- LLM Generation (fallback only)  
-↓  
-Explainability Layer (sources, confidence, fallback reason)  
-↓  
-Final Answer  
+app/  
+- recommendation/        Cache -> DB -> Live API pipeline  
+- chatbot/               RAG + LLM logic  
+- governance/            Safety and filtering rules  
+- logging/               Structured log utilities  
+- routes/                API endpoints  
+
+data/  
+- books_dataset.json  
+- faiss_index/  
+
+templates/  
+- index.html  
+- developer_logs.html  
 
 ---
 
-## Repository Structure
+# Design Philosophy
 
+KittyLit prioritizes:
+
+- Determinism over randomness  
+- Traceability over opacity  
+- Safety over fluency  
+- Cost control over unrestricted generation  
+- Modular separation over monolithic AI pipelines  
+
+The goal is not to build a feature-heavy demo, but to demonstrate how trustworthy, production-minded AI systems should be engineered.
